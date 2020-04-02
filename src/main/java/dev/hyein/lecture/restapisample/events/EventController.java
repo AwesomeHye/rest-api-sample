@@ -1,8 +1,10 @@
 package dev.hyein.lecture.restapisample.events;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,20 +29,22 @@ public class EventController {
     EventRepository eventRepository;
 */
     private final EventRepository eventRepository;
+    private final ModelMapper modelMapper;
 
     //생성자가 하나만 있고 파라미터가 이미 빈으로 등록되어있으면 @Autowired 안 붙여도 된다. (spring 4.3 ~)
-    public EventController(EventRepository eventRepository) {
+    public EventController(EventRepository eventRepository, ModelMapper modelMapper) {
         this.eventRepository = eventRepository;
+        this.modelMapper = modelMapper;
     }
 
     @PostMapping()
-    public ResponseEntity createEvent(@RequestBody Event event){
+    public ResponseEntity createEvent(@RequestBody EventDto eventDto){
+        Event event = modelMapper.map(eventDto, Event.class);
         Event newEvent = eventRepository.save(event);
 
         //Location 헤더에 쓰이는 생성한 이벤트 조회하는 URI //http://localhost/api/events/%257Bid%257D
         URI createdUri = linkTo(EventController.class).slash(newEvent.getId()).toUri();
-        event.setId(1);
 
-        return ResponseEntity.created(createdUri).body(event);
+        return ResponseEntity.created(createdUri).body(newEvent);
     }
 }
