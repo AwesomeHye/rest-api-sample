@@ -26,4 +26,16 @@ public class Event {
     private int limitOfEnrollment;
     @Enumerated(EnumType.STRING)
     private EventStatus eventStatus = EventStatus.DRAFT;
+
+    public void update() {
+        // update free
+        if(basePrice == 0 && maxPrice == 0)
+            free = true;
+        else
+            free = false;
+
+        //update offline
+        offline = !(location == null || location.isBlank() ); //since java 11
+
+    }
 }

@@ -55,6 +55,7 @@ public class EventController {
         }
 
         Event event = modelMapper.map(eventDto, Event.class);
+        event.update();
         Event newEvent = eventRepository.save(event);
 
         //Location 헤더에 쓰이는 생성한 이벤트 조회하는 URI //http://localhost/api/events/%257Bid%257D
