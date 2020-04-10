@@ -2,6 +2,7 @@ package dev.hyein.lecture.restapisample.events;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -43,7 +44,7 @@ public class EventController {
         this.modelMapper = modelMapper;
     }
 
-    @PostMapping()
+    @PostMapping
     public ResponseEntity createEvent(@RequestBody @Valid EventDto eventDto, Errors errors){
         if(errors.hasErrors()){
             return ResponseEntity.badRequest().body(errors);
@@ -58,9 +59,18 @@ public class EventController {
         event.update();
         Event newEvent = eventRepository.save(event);
 
-        //Location 헤더에 쓰이는 생성한 이벤트 조회하는 URI //http://localhost/api/events/%257Bid%257D
+        //Location 헤더에 쓰이는 생성한 이벤트 조회하는 URI // = http://localhost/api/events/%257Bid%257D
         URI createdUri = linkTo(EventController.class).slash(newEvent.getId()).toUri();
 
-        return ResponseEntity.created(createdUri).body(newEvent);
+        //HATEOAS 링크 추가
+        EventResource eventResource = new EventResource(newEvent);
+        //이벤트 목록
+        Link eventsLink = linkTo(EventController.class).withRel("query-events"); // = http://localhost/api/events
+        eventResource.add(eventsLink);
+        //이벤트 수정
+        Link updateLink = linkTo(EventController.class).slash(newEvent.getId()).withRel("update-event"); // = http://localhost/api/events/1
+        eventResource.add(updateLink);
+
+        return ResponseEntity.created(createdUri).body(eventResource);
     }
 }
