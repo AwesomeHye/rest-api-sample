@@ -70,7 +70,8 @@ public class EventController {
         //이벤트 수정
         Link updateLink = linkTo(EventController.class).slash(newEvent.getId()).withRel("update-event"); // = http://localhost/api/events/1
         eventResource.add(updateLink);
-
+        //profile (API 설명) 추가
+        eventResource.add(new Link("/docs/index.html/#resourced-events-create").withRel("profile"));
         return ResponseEntity.created(createdUri).body(eventResource);
     }
 }

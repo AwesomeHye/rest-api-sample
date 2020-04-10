@@ -18,12 +18,12 @@ public class Event {
     private LocalDateTime closeEnrollmentDateTime;
     private LocalDateTime beginEventDateTime;
     private LocalDateTime endEventDateTime;
-    private boolean offline;
-    private String location;
-    private boolean free;
     private int basePrice;
     private int maxPrice;
     private int limitOfEnrollment;
+    private boolean offline;
+    private String location;
+    private boolean free;
     @Enumerated(EnumType.STRING)
     private EventStatus eventStatus = EventStatus.DRAFT;
 

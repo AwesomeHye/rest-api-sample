@@ -1,16 +1,19 @@
 package dev.hyein.lecture.restapisample.events;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.hyein.lecture.restapisample.common.RestDocsConfiguration;
 import dev.hyein.lecture.restapisample.common.TestDescription;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -19,6 +22,11 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
 
+import static org.springframework.restdocs.headers.HeaderDocumentation.*;
+import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.linkWithRel;
+import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.links;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -26,6 +34,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringRunner.class)
 @SpringBootTest //@SpringBootApplication 부터 시작해서 모든 빈 등록
 @AutoConfigureMockMvc
+@AutoConfigureRestDocs
+@Import(RestDocsConfiguration.class)
 public class EventControllerTest {
 
     @Autowired
@@ -68,6 +78,55 @@ public class EventControllerTest {
                 .andExpect(jsonPath("_links.self").exists())
                 .andExpect(jsonPath("_links.query-events").exists())
                 .andExpect(jsonPath("_links.update-event").exists())
+                .andDo(document("create-event",
+                links(
+                        linkWithRel("self").description("link to self"),
+                        linkWithRel("query-events").description("link to query events"),
+                        linkWithRel("update-event").description("link to update"),
+                        linkWithRel("profile").description("link to profile")
+
+                ),
+                requestHeaders(
+                        headerWithName(HttpHeaders.ACCEPT).description("HAL+JSON"),
+                        headerWithName(HttpHeaders.CONTENT_TYPE).description("HAL+JSON")
+                        ),
+                requestFields(
+                        fieldWithPath("name").description("new event name"),
+                        fieldWithPath("description").description("new event description"),
+                        fieldWithPath("beginEnrollmentDateTime").description("new event begin enrollment time"),
+                        fieldWithPath("closeEnrollmentDateTime").description("new event close enrollment time"),
+                        fieldWithPath("beginEventDateTime").description("new event begin time"),
+                        fieldWithPath("endEventDateTime").description("new event end time"),
+                        fieldWithPath("location").description("new event location"),
+                        fieldWithPath("basePrice").description("new event base price"),
+                        fieldWithPath("maxPrice").description("new event location max price"),
+                        fieldWithPath("limitOfEnrollment").description("new event limit of enrollment")
+                ),
+                responseHeaders(
+                        headerWithName(HttpHeaders.LOCATION).description("get events"),
+                        headerWithName(HttpHeaders.CONTENT_TYPE).description("HAL+JSON")
+                ),
+                responseFields(
+                        fieldWithPath("id").description("new event id"),
+                        fieldWithPath("name").description("new event name"),
+                        fieldWithPath("description").description("new event description"),
+                        fieldWithPath("beginEnrollmentDateTime").description("new event begin enrollment time"),
+                        fieldWithPath("closeEnrollmentDateTime").description("new event close enrollment time"),
+                        fieldWithPath("beginEventDateTime").description("new event begin time"),
+                        fieldWithPath("endEventDateTime").description("new event end time"),
+                        fieldWithPath("location").description("new event location"),
+                        fieldWithPath("basePrice").description("new event base price"),
+                        fieldWithPath("maxPrice").description("new event location max price"),
+                        fieldWithPath("limitOfEnrollment").description("new event limit of enrollment"),
+                        fieldWithPath("offline").description("new event is offline"),
+                        fieldWithPath("free").description("new event is free"),
+                        fieldWithPath("eventStatus").description("new event status"),
+                        fieldWithPath("_links.self.href").description("link to self"),
+                        fieldWithPath("_links.query-events.href").description("link to query-events"),
+                        fieldWithPath("_links.update-event.href").description("link to update-event"),
+                        fieldWithPath("_links.profile.href").description("link to profile")
+                )
+        ))
                 ;
 
     }
