@@ -9,7 +9,7 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
-@Data @Builder
+@Data @Builder @NoArgsConstructor @AllArgsConstructor
 public class EventDto {
     @NotEmpty
     private String name;

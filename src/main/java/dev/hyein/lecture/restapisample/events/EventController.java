@@ -14,14 +14,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.Errors;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.net.URI;
 import java.util.List;
+import java.util.Optional;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 
@@ -83,9 +81,6 @@ public class EventController {
         return ResponseEntity.created(createdUri).body(eventResource);
     }
 
-    private ResponseEntity<ErrorsResource> badRequest(Errors errors) {
-        return ResponseEntity.badRequest().body(new ErrorsResource(errors));
-    }
 
     @GetMapping
     public ResponseEntity getEvents(Pageable pageable, PagedResourcesAssembler<Event> assembler){
@@ -99,4 +94,51 @@ public class EventController {
 
         return ResponseEntity.ok(eventPageModel);
     }
+
+    @GetMapping("/{id}") // /api/events/{id} (@RequestMapping + uri)
+    public ResponseEntity getEvent(@PathVariable Integer id){
+        Optional<Event> optionalEvent = eventRepository.findById(id);
+        if(optionalEvent.isEmpty()){
+            return ResponseEntity.notFound().build();
+        } else{
+            EventResource eventResource = new EventResource(optionalEvent.get());
+            eventResource.add(new Link("/docs/index.html/#resources-events-get").withRel("profile"));
+
+            return ResponseEntity.ok(eventResource);
+        }
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity updateEvent(@PathVariable Integer id, @Valid @RequestBody EventDto eventDto, Errors errors){
+        Optional<Event> optionalEvent = eventRepository.findById(id);
+
+        // 이벤트가 없는 경우
+        if (optionalEvent.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        // 입력값이 없는 경우
+        if(errors.hasErrors()){
+            return badRequest(errors);
+        }
+        // 잘못된 값
+        eventValidator.validate(eventDto, errors);
+        if(errors.hasErrors()){
+            return badRequest(errors);
+        }
+
+        Event existingEvent = optionalEvent.get();
+        modelMapper.map(eventDto, existingEvent);
+        Event updatedEvent = eventRepository.save(existingEvent);
+
+        EventResource eventResource = new EventResource(updatedEvent);
+        eventResource.add(new Link("/docs/index.html/#update-event").withRel("profile"));
+        return ResponseEntity.ok(eventResource);
+    }
+
+    private ResponseEntity<ErrorsResource> badRequest(Errors errors) {
+        return ResponseEntity.badRequest().body(new ErrorsResource(errors));
+    }
+
+
 }
