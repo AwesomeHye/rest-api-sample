@@ -3,18 +3,25 @@ package dev.hyein.lecture.restapisample.events;
 import dev.hyein.lecture.restapisample.common.ErrorsResource;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.Errors;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.validation.Valid;
 import java.net.URI;
+import java.util.List;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 
@@ -78,5 +85,18 @@ public class EventController {
 
     private ResponseEntity<ErrorsResource> badRequest(Errors errors) {
         return ResponseEntity.badRequest().body(new ErrorsResource(errors));
+    }
+
+    @GetMapping
+    public ResponseEntity getEvents(Pageable pageable, PagedResourcesAssembler<Event> assembler){
+        Page<Event> eventPages = eventRepository.findAll(pageable); // 페이지 정보에 해당하는 이벤트만 find함
+        //page link 추가: 인자로 받은 PagedResourcesAssembler 가 Page 객체에 link 정보(처음,끝,이전,다음,self)도 추가해줌
+        //event link 추가: 2번째 인자로
+        PagedModel<EntityModel<Event>> eventPageModel = assembler.toModel(eventPages, e -> new EventResource(e));
+        //self-descriptive
+        eventPageModel.add(new Link("/docs/index.html/#resources-events-list").withRel("profile"));
+
+
+        return ResponseEntity.ok(eventPageModel);
     }
 }
