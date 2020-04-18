@@ -1,6 +1,7 @@
 package dev.hyein.lecture.restapisample.index;
 
 
+import dev.hyein.lecture.restapisample.common.BaseControllerTest;
 import dev.hyein.lecture.restapisample.common.RestDocsConfiguration;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,15 +18,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-@SpringBootTest
-@RunWith(SpringRunner.class)
-@AutoConfigureMockMvc
-@AutoConfigureRestDocs
-@ActiveProfiles("test")
-@Import(RestDocsConfiguration.class)
-public class IndexControllerTest {
-    @Autowired
-    MockMvc mockMvc;
+
+public class IndexControllerTest extends BaseControllerTest {
+
 
     @Test
     public void index() throws Exception {

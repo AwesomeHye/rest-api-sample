@@ -1,6 +1,7 @@
 package dev.hyein.lecture.restapisample.events;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.hyein.lecture.restapisample.common.BaseControllerTest;
 import dev.hyein.lecture.restapisample.common.RestDocsConfiguration;
 import dev.hyein.lecture.restapisample.common.TestDescription;
 import org.junit.Test;
@@ -30,22 +31,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest //@SpringBootApplication 부터 시작해서 모든 빈 등록
-@AutoConfigureMockMvc
-@AutoConfigureRestDocs
-@Import(RestDocsConfiguration.class)
-@ActiveProfiles("test")
-public class EventControllerTest {
 
-    @Autowired
-    MockMvc mockMvc;
+public class EventControllerTest extends BaseControllerTest {
 
-    //스프링 부트 사용시 MappingJacksonJson이 의존성으로 들어가있으면 ObjectMapper을 자동으로 빈으로 등록해준다.
-    @Autowired
-    ObjectMapper objectMapper;
-    @Autowired
-    ModelMapper modelMapper;
 
     @Autowired
     EventRepository eventRepository;
