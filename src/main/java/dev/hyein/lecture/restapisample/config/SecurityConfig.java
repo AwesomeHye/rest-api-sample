@@ -16,12 +16,17 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.InMemoryTokenStore;
 
-// Spring Security를 스프링부트 내장 설정이 아닌 커스터마이징 설정으로 적용
+
+
+/**
+ * 유저 인증 정보 설정
+ * Spring Security를 스프링부트 내장 설정이 아닌 커스터마이징 설정으로 적용
+ */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-    // Authentication Manager가 적용시킬 두 개 인터페이스 선안
+    // Authentication Manager가 적용시킬 두 개 인터페이스 선언
     @Autowired
     AccountService accountService;
     @Autowired
