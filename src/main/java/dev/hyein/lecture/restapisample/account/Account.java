@@ -12,6 +12,7 @@ public class Account {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+    @Column(unique = true)
     private String email;
     private String password;
     @ElementCollection(fetch = FetchType.EAGER) // enum의 리스트를 가져오므로 선언. EAGER는 모든 데이터를 가져옴.

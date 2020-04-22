@@ -1,6 +1,7 @@
 package dev.hyein.lecture.restapisample.config;
 
         import dev.hyein.lecture.restapisample.account.AccountService;
+        import dev.hyein.lecture.restapisample.common.AppProperties;
         import org.springframework.beans.factory.annotation.Autowired;
         import org.springframework.context.annotation.Configuration;
         import org.springframework.security.authentication.AuthenticationManager;
@@ -18,6 +19,8 @@ public class AuthServerConfig extends AuthorizationServerConfigurerAdapter {
     @Autowired
     PasswordEncoder passwordEncoder;
 
+    @Autowired
+    AppProperties appProperties;
 
     // for configure(AuthorizationServerEndpointsConfigurer)
     @Autowired
@@ -42,8 +45,8 @@ public class AuthServerConfig extends AuthorizationServerConfigurerAdapter {
     @Override
     public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
         clients.inMemory()
-                .withClient("CLIENT_ID")
-                .secret(passwordEncoder.encode("CLIENT_SECRET"))
+                .withClient(appProperties.getClientId())
+                .secret(passwordEncoder.encode(appProperties.getClientSecret()))
                 .authorizedGrantTypes("password", "refresh_token") // 이 인증 서버가 지원할 토큰 설정. refresh_token: auth token받을 때 발급받는 토큰으로 새로운 access token을 발급받는다.
                 .scopes("read", "write")
                 .accessTokenValiditySeconds(60 * 10)

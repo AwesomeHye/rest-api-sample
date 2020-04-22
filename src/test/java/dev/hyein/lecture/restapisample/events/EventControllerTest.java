@@ -5,6 +5,7 @@ import dev.hyein.lecture.restapisample.account.Account;
 import dev.hyein.lecture.restapisample.account.AccountRepository;
 import dev.hyein.lecture.restapisample.account.AccountRole;
 import dev.hyein.lecture.restapisample.account.AccountService;
+import dev.hyein.lecture.restapisample.common.AppProperties;
 import dev.hyein.lecture.restapisample.common.BaseControllerTest;
 import dev.hyein.lecture.restapisample.common.RestDocsConfiguration;
 import dev.hyein.lecture.restapisample.common.TestDescription;
@@ -50,6 +51,8 @@ public class EventControllerTest extends BaseControllerTest {
     AccountService accountService;
     @Autowired
     AccountRepository accountRepository;
+    @Autowired
+    AppProperties appProperties;
 
     @Before
     public void deleteAll(){
@@ -65,21 +68,19 @@ public class EventControllerTest extends BaseControllerTest {
      */
     public String getAccessToken() throws Exception{
         //given
-        String userName = "catsarah@gmail.com";
-        String password = "cat";
+        String userName = appProperties.getUserUsername();
+        String password = appProperties.getUserPassword();
         Account account = Account.builder()
                 .email(userName)
                 .password(password)
-                .roles(Set.of(AccountRole.ADMIN, AccountRole.USER))
+                .roles(Set.of(AccountRole.USER))
                 .build();
         accountService.saveAccount(account);
 
 
         // then
-        String clientId = "CLIENT_ID";
-        String clientSecret = "CLIENT_SECRET";
         String reponseBody = mockMvc.perform(post("/oauth/token")
-                .with(httpBasic(clientId, clientSecret)) // http basic 인증 사용
+                .with(httpBasic(appProperties.getClientId(), appProperties.getClientSecret())) // http basic 인증 사용
                 .param("grant_type", "password")
                 .param("username", userName)
                 .param("password", password))

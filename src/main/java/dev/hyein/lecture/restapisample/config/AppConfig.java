@@ -3,6 +3,7 @@ package dev.hyein.lecture.restapisample.config;
 import dev.hyein.lecture.restapisample.account.Account;
 import dev.hyein.lecture.restapisample.account.AccountRole;
 import dev.hyein.lecture.restapisample.account.AccountService;
+import dev.hyein.lecture.restapisample.common.AppProperties;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
@@ -32,14 +33,25 @@ public class AppConfig {
         return new ApplicationRunner() {
             @Autowired
             AccountService accountService;
+            @Autowired
+            AppProperties appProperties;
+
             @Override
             public void run(ApplicationArguments args) throws Exception {
-                Account account = Account.builder()
-                                        .email("catsarah3333@gmail.com")
-                                        .password("cat")
-                                        .roles(Set.of(AccountRole.ADMIN, AccountRole.USER))
+                Account admin = Account.builder()
+                                        .email(appProperties.getAdminUsername())
+                                        .password(appProperties.getAdminPassword())
+                                        .roles(Set.of(AccountRole.ADMIN))
                                         .build();
-                accountService.saveAccount(account);
+                accountService.saveAccount(admin);
+
+
+                Account user = Account.builder()
+                        .email(appProperties.getUserUsername())
+                        .password(appProperties.getUserPassword())
+                        .roles(Set.of(AccountRole.USER))
+                        .build();
+                accountService.saveAccount(user);
             }
         };
     }
