@@ -1,7 +1,9 @@
 package dev.hyein.lecture.restapisample.events;
 
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import dev.hyein.lecture.restapisample.account.Account;
+import dev.hyein.lecture.restapisample.account.AccountSerializer;
 import lombok.*;
 
 import javax.persistence.*;
@@ -28,6 +30,7 @@ public class Event {
     @Enumerated(EnumType.STRING)
     private EventStatus eventStatus = EventStatus.DRAFT;
     @ManyToOne
+    @JsonSerialize(using = AccountSerializer.class)
     private Account manager; // 계정 관리자
 
     public void update() {

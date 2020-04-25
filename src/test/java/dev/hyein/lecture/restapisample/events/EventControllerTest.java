@@ -9,6 +9,8 @@ import dev.hyein.lecture.restapisample.common.AppProperties;
 import dev.hyein.lecture.restapisample.common.BaseControllerTest;
 import dev.hyein.lecture.restapisample.common.RestDocsConfiguration;
 import dev.hyein.lecture.restapisample.common.TestDescription;
+import org.hamcrest.Matcher;
+import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -77,7 +79,6 @@ public class EventControllerTest extends BaseControllerTest {
                 .build();
         accountService.saveAccount(account);
 
-
         // then
         String reponseBody = mockMvc.perform(post("/oauth/token")
                 .with(httpBasic(appProperties.getClientId(), appProperties.getClientSecret())) // http basic 인증 사용
@@ -122,6 +123,7 @@ public class EventControllerTest extends BaseControllerTest {
                 .andExpect(jsonPath("_links.self").exists())
                 .andExpect(jsonPath("_links.query-events").exists())
                 .andExpect(jsonPath("_links.update-event").exists())
+                .andExpect(jsonPath("manager").value(Matchers.notNullValue()))
                 .andDo(document("create-event",
                 links(
                         linkWithRel("self").description("link to self"),
@@ -169,7 +171,7 @@ public class EventControllerTest extends BaseControllerTest {
                         fieldWithPath("_links.query-events.href").description("link to query-events"),
                         fieldWithPath("_links.update-event.href").description("link to update-event"),
                         fieldWithPath("_links.profile.href").description("link to profile"),
-                        fieldWithPath("manager").description("??")
+                        fieldWithPath("manager.id").description("current user id")
 
                 )
         ))
@@ -264,7 +266,7 @@ public class EventControllerTest extends BaseControllerTest {
 
 
     @Test
-    @TestDescription("30개 이벤트를 10개씩 두번째 페이지 조회하기")
+    @TestDescription("인증 없이 30개 이벤트를 10개씩 두번째 페이지 조회하기")
     public void queryEvents() throws Exception{
         //Given 이벤트 30개
         IntStream.range(0, 30).forEach(i -> generateEvent(i));
@@ -284,9 +286,31 @@ public class EventControllerTest extends BaseControllerTest {
                 ;
     }
 
+    @Test
+    @TestDescription("인증된 사용자가 30개 이벤트를 10개씩 두번째 페이지 조회하기")
+    public void queryEventsWithAuthentication() throws Exception{
+        //Given 이벤트 30개
+        IntStream.range(0, 30).forEach(i -> generateEvent(i));
+
+        //when & then
+        mockMvc.perform(get("/api/events")
+                .header(HttpHeaders.AUTHORIZATION, getBearerToken())
+                .param("page", "1")
+                .param("size", "10")
+                .param("sort", "name,DESC"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("page").exists())
+                .andExpect(jsonPath("_embedded.eventList[0]._links.self").exists())
+                .andExpect(jsonPath("_links.self").exists())
+                .andExpect(jsonPath("_links.profile").exists())
+                .andExpect(jsonPath("_links.create-event").exists())
+                .andDo(document("get-events"))
+        ;
+    }
 
     @Test
-    @TestDescription("기존 한 개 이벤트 조회하기")
+    @TestDescription("인증 없이 기존 한 개 이벤트 조회하기")
     public void getEvent() throws Exception{
         //given
         Event event = generateEvent(100);
@@ -301,6 +325,26 @@ public class EventControllerTest extends BaseControllerTest {
                 .andExpect(jsonPath("_links.profile").exists())
                 .andDo(document("get-an-event"))
                 ;
+    }
+
+    @Test
+    @TestDescription("인증된 사용자가 기존 한 개 이벤트 조회하기")
+    public void getEventWithAuthentication() throws Exception{
+        //given
+        Event event = generateEvent(100);
+
+        //when & then
+        mockMvc.perform(get("/api/events/{id}", event.getId())
+                        .header(HttpHeaders.AUTHORIZATION, getBearerToken()))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("name").exists())
+                .andExpect(jsonPath("id").exists())
+                .andExpect(jsonPath("_links.self").exists())
+                .andExpect(jsonPath("_links.profile").exists())
+                .andExpect(jsonPath("_links.update-event").exists())
+                .andDo(document("get-an-event"))
+        ;
     }
 
     @Test
